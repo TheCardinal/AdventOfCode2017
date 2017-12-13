@@ -26,10 +26,7 @@ public class Scanner
 	{
 		int count = range - 1;
 		int help = 2 * count;
-		while (time >= help)
-		{
-			time -= help;
-		}
+		time = time % help;
 		if (time < range)
 		{
 			return time;

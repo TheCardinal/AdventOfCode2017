@@ -10,50 +10,27 @@ public class Day13
 {
 	public static int START_DELAY = 0;
 
-	private static boolean CAUGHT = false;
-
 	public static boolean noScannersAtTop(List<Scanner> scanners, int delay)
 	{
-		boolean result = !scanners.stream().anyMatch(scanner -> scanner.atTop(scanner.getDepth() + delay));
-		if (!result)
-		{
-			// List<Scanner> onTop = scanners.stream().filter(scanner -> scanner.atTop(scanner.getDepth() + delay)).collect(Collectors.toList());
-			// System.out.println("" + onTop);
-		}
-		return result;
+		return !scanners.stream().anyMatch(scanner -> scanner.atTop(scanner.getDepth() + delay));
 	}
 
-	public static int getFreeRunTime(List<Scanner> scanners)
+	public static int getFreeRunDelay(List<Scanner> scanners)
 	{
-		int delay = START_DELAY;
-		int maxDepth = maxDepth(scanners);
-		int severity = moveThroughFirewall(scanners, delay);
-
-		while (severity > 0)
+		int x = 0;
+		for (;; x++)
 		{
-			// System.out.print(".");
-			delay++;
-			severity = moveThroughFirewall(scanners, delay);
-			if (delay % 1000 == 0)
-			{
-				System.out.print(delay + " ");
-			}
-			if (delay % 20000 == 0)
+			System.out.print(".");
+			if (x % 300 == 0)
 			{
 				System.out.println("");
 			}
-
-			if (severity == 0 && CAUGHT)
+			if (Day13.noScannersAtTop(scanners, x))
 			{
-				CAUGHT = false;
-				severity += 1;
-				System.out.println("");
-				System.out.println("Delay = " + delay + ": No severity, but was caught!");
+				break;
 			}
 		}
-		System.out.println("");
-		System.out.println("Delay = " + delay + " MaxDepth = " + maxDepth);
-		return delay + maxDepth;
+		return x;
 	}
 
 	public static int moveThroughFirewall(List<Scanner> scanners, int delay)
@@ -68,7 +45,6 @@ public class Day13
 				Scanner scanner = getScannerAtDepth(scanners, myPosition);
 				if (scanner.atTop(myPosition + delay))
 				{
-					CAUGHT = true;
 					severity += scanner.getSeverity();
 				}
 			}

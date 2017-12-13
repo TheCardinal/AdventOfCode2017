@@ -27,41 +27,16 @@ public class Day13Test
 	}
 
 	@Test
-	public void exampleBonus()
-	{
-		int time = Day13.getFreeRunTime(Day13.getScannersExample());
-		assertEquals(10, time);
-	}
-
-	@Test
 	public void exampleBonus2()
 	{
-		assertEquals(10, getDelay(Day13.getScannersExample()));
+		assertEquals(10, Day13.getFreeRunDelay(Day13.getScannersExample()));
 	}
 
 	@Test
 	public void assignmentBonus()
 	{
-		System.out.println(getDelay(Day13.getScannersAssignment()));
+		System.out.println(Day13.getFreeRunDelay(Day13.getScannersAssignment()));
 		// Answer: 3870382
-	}
-
-	private int getDelay(List<Scanner> scanners)
-	{
-		int x = 0;
-		for (;; x++)
-		{
-			System.out.print(".");
-			if (x % 300 == 0)
-			{
-				System.out.println("");
-			}
-			if (Day13.noScannersAtTop(scanners, x))
-			{
-				break;
-			}
-		}
-		return x;
 	}
 
 	@Test
