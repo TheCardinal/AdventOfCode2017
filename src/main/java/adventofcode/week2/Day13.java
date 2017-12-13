@@ -8,8 +8,6 @@ import adventofcode.helpers.Scanner;
 
 public class Day13
 {
-	public static int START_DELAY = 0;
-
 	public static boolean noScannersAtTop(List<Scanner> scanners, int delay)
 	{
 		return !scanners.stream().anyMatch(scanner -> scanner.atTop(scanner.getDepth() + delay));
@@ -20,11 +18,6 @@ public class Day13
 		int x = 0;
 		for (;; x++)
 		{
-			System.out.print(".");
-			if (x % 300 == 0)
-			{
-				System.out.println("");
-			}
 			if (Day13.noScannersAtTop(scanners, x))
 			{
 				break;
