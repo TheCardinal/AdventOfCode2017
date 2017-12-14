@@ -11,7 +11,7 @@ import org.junit.Test;
 import adventofcode.DayTester;
 import adventofcode.helpers.Scanner;
 
-public class Day13Test extends DayTester<Day13>
+public class Day13Test extends DayTester<Day13, List<Scanner>>
 {
 	public Day13Test()
 	{

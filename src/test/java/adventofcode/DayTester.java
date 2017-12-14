@@ -2,7 +2,7 @@ package adventofcode;
 
 import org.junit.Test;
 
-public class DayTester<T extends AbstractDay>
+public class DayTester<T extends AbstractDay<Y>, Y>
 {
 	private Class<T> clazz;
 
