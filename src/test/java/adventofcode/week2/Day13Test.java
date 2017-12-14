@@ -8,41 +8,20 @@ import java.util.List;
 
 import org.junit.Test;
 
+import adventofcode.DayTester;
 import adventofcode.helpers.Scanner;
 
-public class Day13Test
+public class Day13Test extends DayTester<Day13>
 {
-	@Test
-	public void exampleTest()
+	public Day13Test()
 	{
-		int severity = Day13.moveThroughFirewall(Day13.getScannersExample(), 0);
-		assertEquals(24, severity);
-	}
-
-	@Test
-	public void assignment()
-	{
-		int severity = Day13.moveThroughFirewall(Day13.getScannersAssignment(), 0);
-		System.out.println(severity);
-	}
-
-	@Test
-	public void exampleBonus2()
-	{
-		assertEquals(10, Day13.getFreeRunDelay(Day13.getScannersExample()));
-	}
-
-	@Test
-	public void assignmentBonus()
-	{
-		System.out.println(Day13.getFreeRunDelay(Day13.getScannersAssignment()));
-		// Answer: 3870382
+		super(Day13.class);
 	}
 
 	@Test
 	public void allScannersStartAtTheTop()
 	{
-		List<Scanner> scanners = Day13.getScannersExample();
+		List<Scanner> scanners = getDay().getExampleInput();
 		for (Scanner scanner : scanners)
 		{
 			assertEquals(0, scanner.getIndexAtTime(0));
@@ -53,7 +32,7 @@ public class Day13Test
 	@Test
 	public void allScannersMove1AtATime()
 	{
-		List<Scanner> scanners = Day13.getScannersExample();
+		List<Scanner> scanners = getDay().getExampleInput();
 		for (Scanner scanner : scanners)
 		{
 			assertEquals(1, scanner.getIndexAtTime(1));
@@ -75,19 +54,21 @@ public class Day13Test
 	@Test
 	public void scannerAtDepthTest()
 	{
-		List<Scanner> scanners = Day13.getScannersExample();
-		assertTrue(Day13.scannerAtDepth(scanners, 0));
-		assertTrue(Day13.scannerAtDepth(scanners, 1));
-		assertFalse(Day13.scannerAtDepth(scanners, 2));
-		assertFalse(Day13.scannerAtDepth(scanners, 3));
-		assertTrue(Day13.scannerAtDepth(scanners, 4));
-		assertFalse(Day13.scannerAtDepth(scanners, 5));
-		assertTrue(Day13.scannerAtDepth(scanners, 6));
+		Day13 day = getDay();
+		List<Scanner> scanners = day.getExampleInput();
+		assertTrue(day.scannerAtDepth(scanners, 0));
+		assertTrue(day.scannerAtDepth(scanners, 1));
+		assertFalse(day.scannerAtDepth(scanners, 2));
+		assertFalse(day.scannerAtDepth(scanners, 3));
+		assertTrue(day.scannerAtDepth(scanners, 4));
+		assertFalse(day.scannerAtDepth(scanners, 5));
+		assertTrue(day.scannerAtDepth(scanners, 6));
 	}
 
 	@Test
 	public void maxDepthTest()
 	{
-		assertEquals(6, Day13.maxDepth(Day13.getScannersExample()));
+		Day13 day = getDay();
+		assertEquals(6, day.maxDepth(day.getExampleInput()));
 	}
 }

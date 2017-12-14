@@ -4,29 +4,13 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import adventofcode.AbstractDay;
 import adventofcode.helpers.Scanner;
 
-public class Day13
+public class Day13 extends AbstractDay<List<Scanner>>
 {
-	public static boolean noScannersAtTop(List<Scanner> scanners, int delay)
-	{
-		return !scanners.stream().anyMatch(scanner -> scanner.atTop(scanner.getDepth() + delay));
-	}
-
-	public static int getFreeRunDelay(List<Scanner> scanners)
-	{
-		int x = 0;
-		for (;; x++)
-		{
-			if (Day13.noScannersAtTop(scanners, x))
-			{
-				break;
-			}
-		}
-		return x;
-	}
-
-	public static int moveThroughFirewall(List<Scanner> scanners, int delay)
+	@Override
+	public void run(List<Scanner> scanners)
 	{
 		int severity = 0;
 		int myPosition = 0;
@@ -36,7 +20,7 @@ public class Day13
 			if (scannerAtDepth(scanners, myPosition))
 			{
 				Scanner scanner = getScannerAtDepth(scanners, myPosition);
-				if (scanner.atTop(myPosition + delay))
+				if (scanner.atTop(myPosition))
 				{
 					severity += scanner.getSeverity();
 				}
@@ -44,25 +28,45 @@ public class Day13
 			myPosition++;
 		}
 
-		return severity;
+		System.out.println("Solution: " + severity);
 	}
 
-	public static boolean scannerAtDepth(List<Scanner> scanners, int depth)
-	{
-		return scanners.stream().anyMatch(scanner -> scanner.getDepth() == depth);
-	}
-
-	public static Scanner getScannerAtDepth(List<Scanner> scanners, int depth)
-	{
-		return scanners.stream().filter(scanner -> scanner.getDepth() == depth).findFirst().get();
-	}
-
-	public static int maxDepth(List<Scanner> scanners)
+	public int maxDepth(List<Scanner> scanners)
 	{
 		return scanners.stream().map(scanner -> scanner.getDepth()).max(Comparator.comparing(i -> i)).get();
 	}
 
-	public static List<Scanner> getScannersExample()
+	public boolean scannerAtDepth(List<Scanner> scanners, int depth)
+	{
+		return scanners.stream().anyMatch(scanner -> scanner.getDepth() == depth);
+	}
+
+	public Scanner getScannerAtDepth(List<Scanner> scanners, int depth)
+	{
+		return scanners.stream().filter(scanner -> scanner.getDepth() == depth).findFirst().get();
+	}
+
+	@Override
+	public void bonus(List<Scanner> input)
+	{
+		int x = 0;
+		for (;; x++)
+		{
+			if (noScannersAtTop(input, x))
+			{
+				break;
+			}
+		}
+		System.out.println("Solution: " + x);
+	}
+
+	public boolean noScannersAtTop(List<Scanner> scanners, int delay)
+	{
+		return !scanners.stream().anyMatch(scanner -> scanner.atTop(scanner.getDepth() + delay));
+	}
+
+	@Override
+	public List<Scanner> getExampleInput()
 	{
 		List<Scanner> scanners = new ArrayList<>();
 		scanners.add(new Scanner(0, 3));
@@ -72,7 +76,8 @@ public class Day13
 		return scanners;
 	}
 
-	public static List<Scanner> getScannersAssignment()
+	@Override
+	public List<Scanner> getAssignmentInput()
 	{
 		List<Scanner> scanners = new ArrayList<>();
 		scanners.add(new Scanner(0, 3));
@@ -120,4 +125,5 @@ public class Day13
 		scanners.add(new Scanner(96, 18));
 		return scanners;
 	}
+
 }
