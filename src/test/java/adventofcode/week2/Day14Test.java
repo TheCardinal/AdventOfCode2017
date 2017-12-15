@@ -39,4 +39,21 @@ public class Day14Test extends DayTester<Day14, String>
 		assertEquals(1, day.countRegions(array));
 	}
 
+	@Test
+	public void countRegionsTest3()
+	{
+		Day14 day = getDay();
+		int[][] array = new int[][] {
+			{ 1, 1, 0, 1, 0, 1, 0, 0 },
+			{ 0, 1, 0, 1, 0, 1, 0, 1 },
+			{ 0, 0, 0, 0, 1, 0, 1, 0 },
+			{ 1, 0, 1, 0, 1, 1, 0, 1 },
+			{ 0, 1, 1, 0, 1, 0, 0, 0 },
+			{ 1, 1, 0, 0, 1, 0, 0, 1 },
+			{ 0, 1, 0, 0, 0, 1, 0, 0 },
+			{ 1, 1, 0, 1, 0, 1, 1, 0 }
+		};
+		assertEquals(12, day.countRegions(array));
+	}
+
 }

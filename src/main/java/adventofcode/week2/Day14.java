@@ -17,49 +17,37 @@ public class Day14 extends AbstractDay<String>
 		System.out.println(countUsed(asBinary));
 	}
 
-	// TODO
 	@Override
 	public void bonus(String input)
 	{
 		String asBinary = inputToBinary(input);
-		System.out.println(asBinary);
 		int[][] array = toArray(asBinary);
 		int regions = countRegions(array);
-		printArray(array);
 		System.out.println(regions);
-
-		// 4663 too high
 	}
 
 	public int countRegions(int[][] array)
 	{
-		int counter = 1;
+		int counter = 0;
 		for (int x = 0; x < array.length; x++)
 		{
-			for (int y = 0; y < array[0].length; y++)
+			for (int y = 0; y < array[x].length; y++)
 			{
 				if (array[x][y] == 1)
 				{
-					int neighborRegion = neighborRegion(array, x, y);
-					if (neighborRegion > 0)
-					{
-						array[x][y] = neighborRegion;
-					}
-					else
-					{
-						array[x][y] = counter++;
-					}
+					counter++;
+					clearRegion(array, x, y);
 				}
 			}
 		}
-		return counter - 1;
+		return counter;
 	}
 
-	private void printArray(int[][] array)
+	public void printArray(int[][] array)
 	{
 		for (int x = 0; x < array.length; x++)
 		{
-			for (int y = 0; y < array[0].length; y++)
+			for (int y = 0; y < array[x].length; y++)
 			{
 				System.out.print(array[x][y]);
 			}
@@ -67,22 +55,41 @@ public class Day14 extends AbstractDay<String>
 		}
 	}
 
-	// TODO: klopt niet want een H-structuur komt er niet goed door
-	private int neighborRegion(int[][] array, int x, int y)
+	// Zet alle 1 om in 0 voor een bepaalde region
+	private void clearRegion(int[][] array, int x, int y)
 	{
-		int boven = x > 0 ? array[x - 1][y] : 0;
-		int links = y > 0 ? array[x][y - 1] : 0;
-		return boven > 0 ? boven : links > 0 ? links : 0;
+		array[x][y] = 0;
+		// boven
+		if (x > 0 && array[x - 1][y] == 1)
+		{
+			clearRegion(array, x - 1, y);
+		}
+		// links
+		if (y > 0 && array[x][y - 1] == 1)
+		{
+			clearRegion(array, x, y - 1);
+		}
+		// onder
+		if (x < array.length - 1 && array[x + 1][y] == 1)
+		{
+			clearRegion(array, x + 1, y);
+		}
+		// rechts
+		if (y < array[x].length - 1 && array[x][y + 1] == 1)
+		{
+			clearRegion(array, x, y + 1);
+		}
 	}
 
 	private int[][] toArray(String input)
 	{
+		input = input.replace("\n", "");
 		int[][] array = new int[128][128];
 		for (int x = 0; x < 128; x++)
 		{
 			for (int y = 0; y < 128; y++)
 			{
-				int charIndex = x + y;
+				int charIndex = (x * 128) + y;
 				array[x][y] = (input.charAt(charIndex) == '1' ? 1 : 0);
 			}
 		}
@@ -96,7 +103,6 @@ public class Day14 extends AbstractDay<String>
 		{
 			String currentInput = input + "-" + x;
 			String knotHash = Day10.bonus(currentInput);
-			// System.out.println("CurrentInput: " + currentInput + " hash: " + knotHash);
 			totalBinary += knotHashToBin(knotHash) + "\n";
 		}
 		return totalBinary;
