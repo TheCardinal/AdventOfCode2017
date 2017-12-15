@@ -1,4 +1,4 @@
-package adventofcode.week2;
+package adventofcode.week3;
 
 import adventofcode.AbstractDay;
 import adventofcode.helpers.Generator;
