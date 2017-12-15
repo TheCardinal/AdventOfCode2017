@@ -122,7 +122,7 @@ public class Day10
 
 		for (int iteration = 1; iteration <= 64; iteration++)
 		{
-			System.out.println("Iteration " + iteration);
+			// System.out.println("Iteration " + iteration);
 			for (int length : lengths)
 			{
 				int takeAt = currentPosition;
