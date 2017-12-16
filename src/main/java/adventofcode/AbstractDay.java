@@ -2,6 +2,18 @@ package adventofcode;
 
 public abstract class AbstractDay<T>
 {
+	private boolean example = false;
+
+	protected boolean isExample()
+	{
+		return example;
+	}
+
+	protected void initialize(boolean isExample)
+	{
+		example = isExample;
+	}
+
 	public abstract void run(T input);
 
 	public abstract void bonus(T input);

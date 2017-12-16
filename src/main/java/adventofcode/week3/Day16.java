@@ -14,16 +14,17 @@ public class Day16 extends AbstractDay<List<String>>
 
 	private final char PARTNER = 'p';
 
-	private char[] dancers;
-
-	public void setDancers(int count)
-	{
-		this.dancers = getDancers(count);
-	}
+	protected char[] dancers;
 
 	public char[] getDancers()
 	{
 		return dancers;
+	}
+
+	@Override
+	protected void initialize(boolean isExample)
+	{
+		this.dancers = getDancers(isExample() ? 5 : 16);
 	}
 
 	@Override
@@ -112,14 +113,12 @@ public class Day16 extends AbstractDay<List<String>>
 	@Override
 	public List<String> getExampleInput()
 	{
-		setDancers(5);
 		return new ArrayList<>(Arrays.asList(new String[] { "s1", "x3/4", "pe/b" }));
 	}
 
 	@Override
 	public List<String> getAssignmentInput()
 	{
-		setDancers(16);
 		return new ArrayList<>(Arrays.asList(ASSIGNMENT.split(",")));
 	}
 
