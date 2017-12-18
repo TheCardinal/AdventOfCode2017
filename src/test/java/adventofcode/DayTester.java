@@ -24,6 +24,7 @@ public class DayTester<T extends AbstractDay<Y>, Y>
 		System.out.println("Run example: ");
 		T day = getDay();
 		day.initialize(true);
+		day.parseInput(day.getExampleInput());
 		day.run(day.getExampleInput());
 	}
 
@@ -33,6 +34,7 @@ public class DayTester<T extends AbstractDay<Y>, Y>
 		System.out.println("Run assignment: ");
 		T day = getDay();
 		day.initialize(false);
+		day.parseInput(day.getAssignmentInput());
 		day.run(day.getAssignmentInput());
 	}
 
@@ -42,6 +44,7 @@ public class DayTester<T extends AbstractDay<Y>, Y>
 		System.out.println("Bonus example: ");
 		T day = getDay();
 		day.initialize(true);
+		day.parseInput(day.getExampleInput());
 		day.bonus(day.getExampleInput());
 	}
 
@@ -51,6 +54,7 @@ public class DayTester<T extends AbstractDay<Y>, Y>
 		System.out.println("Bonus assignment: ");
 		T day = getDay();
 		day.initialize(false);
+		day.parseInput(day.getAssignmentInput());
 		day.bonus(day.getAssignmentInput());
 	}
 }

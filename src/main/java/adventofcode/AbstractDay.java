@@ -14,6 +14,10 @@ public abstract class AbstractDay<T>
 		example = isExample;
 	}
 
+	protected void parseInput(T input)
+	{
+	}
+
 	public abstract void run(T input);
 
 	public abstract void bonus(T input);
