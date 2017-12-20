@@ -1,6 +1,5 @@
 package adventofcode.week3;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -10,17 +9,10 @@ import java.util.Queue;
 import java.util.stream.Collectors;
 
 import adventofcode.AbstractDay;
-import adventofcode.helpers.OperationType;
 import adventofcode.helpers.RegisterInstruction;
 
 public class Day18 extends AbstractDay<List<String>>
 {
-	private int instructionIndexP0 = 0, instructionIndexP1 = 0;
-
-	private List<RegisterInstruction> instructionsP0, instructionsP1;
-
-	private Map<String, Long> registersP0, registersP1;
-
 	private Map<String, Long> playedSounds;
 
 	private Queue<Long> queueP0, queueP1;
@@ -30,46 +22,28 @@ public class Day18 extends AbstractDay<List<String>>
 	private int p1Sends = 0;
 
 	@Override
-	protected void initialize(boolean isExample)
-	{
-		super.initialize(isExample);
-		instructionsP0 = new ArrayList<>();
-		registersP0 = new HashMap<>();
-		playedSounds = new HashMap<>();
-	}
-
-	protected void initializeBonus()
-	{
-		registersP0.put("p", 0L);
-
-		// Replace SOUND with SEND and RECOVER with RECEIVE
-		instructionsP0.stream()
-			.filter(ri -> ri.operationType == OperationType.SOUND || ri.operationType == OperationType.RECOVER)
-			.collect(Collectors.toList())
-			.forEach(ri -> ri.operationType = (ri.operationType == OperationType.SOUND ? OperationType.SEND : OperationType.RECEIVE));
-
-		instructionsP0.stream()
-			.filter(ri -> ri.operationType == OperationType.SEND || ri.operationType == OperationType.RECEIVE)
-			.collect(Collectors.toList())
-			.forEach(ri -> ri.valueRegisterName = ri.registerName);
-
-		instructionsP1 = new ArrayList<>(instructionsP0);
-		registersP1 = new HashMap<>(registersP0);
-		registersP1.put("p", 1L);
-
-		queueP0 = new LinkedList<>();
-		queueP1 = new LinkedList<>();
-	}
-
-	@Override
 	public void run(List<String> input)
 	{
 		// executeInstructions(registersP0, instructionsP0, instructionIndexP0, true);
 		// 2147483647 = too high
 		// 3423 = correct
-		Day18Thread t = new Day18Thread(true);
-		t.start();
 
+		// Initialize
+		playedSounds = new HashMap<>();
+		// parse the input
+		List<RegisterInstruction> instructions = input.stream().map(i -> new RegisterInstruction(i)).collect(Collectors.toList());
+		List<String> registerNames = instructions.stream().map(ri -> ri.registerName).collect(Collectors.toList());
+		Map<String, Long> registers = new HashMap<>();
+		for (String registerName : registerNames)
+		{
+			if (registerName.matches("[a-z]{1}"))
+			{
+				registers.put(registerName, 0L);
+			}
+		}
+
+		Day18Thread t = new Day18Thread(instructions, registers, true);
+		t.start();
 		while (t.isAlive())
 		{
 			// Wait till thread stops
@@ -79,39 +53,33 @@ public class Day18 extends AbstractDay<List<String>>
 	@Override
 	public void bonus(List<String> input)
 	{
-		initializeBonus();
-		Day18Thread t0 = new Day18Thread(true);
-		t0.start();
-
-		Day18Thread t1 = new Day18Thread(false);
-		t1.start();
-
-		while (t0.isAlive() || t1.isAlive())
-		{
-			// System.out.println("P0");
-			// int p0Movement = executeInstructions(registersP0, instructionsP0, instructionIndexP0, true);
-			// System.out.println("P0 moved: " + p0Movement);
-			// System.out.println("P1");
-			// int p1Movement = executeInstructions(registersP1, instructionsP1, instructionIndexP1, false);
-			// System.out.println("P1 moved: " + p1Movement);
-			//
-			// movementMade = p0Movement + p1Movement;
-		}
-		System.out.println("result: " + p1Sends);
-	}
-
-	@Override
-	protected void parseInput(List<String> input)
-	{
-		instructionsP0 = input.stream().map(i -> new RegisterInstruction(i)).collect(Collectors.toList());
-		List<String> registerNames = instructionsP0.stream().map(ri -> ri.registerName).collect(Collectors.toList());
+		// parse the input
+		List<RegisterInstruction> instructions = input.stream().map(i -> new RegisterInstruction(i)).collect(Collectors.toList());
+		List<String> registerNames = instructions.stream().map(ri -> ri.registerName).collect(Collectors.toList());
+		Map<String, Long> registers = new HashMap<>();
 		for (String registerName : registerNames)
 		{
 			if (registerName.matches("[a-z]{1}"))
 			{
-				registersP0.put(registerName, 0L);
+				registers.put(registerName, 0L);
 			}
 		}
+
+		queueP0 = new LinkedList<>();
+		queueP1 = new LinkedList<>();
+
+		Day18Thread t0 = new Day18Thread(instructions, registers, true);
+		registers.put("p", 1L);
+		Day18Thread t1 = new Day18Thread(instructions, registers, false);
+
+		t0.start();
+		t1.start();
+
+		while (t0.isAlive() || t1.isAlive())
+		{
+			// wait for threads to stop
+		}
+		System.out.println("result: " + p1Sends);
 	}
 
 	@Override
@@ -181,51 +149,44 @@ public class Day18 extends AbstractDay<List<String>>
 
 	private class Day18Thread extends Thread
 	{
+		private int instructionIndex;
+
+		private List<RegisterInstruction> instructions;
+
+		private Map<String, Long> registers;
+
 		private final boolean isP0;
 
-		public Day18Thread(boolean isP0)
+		public Day18Thread(List<RegisterInstruction> instructions, Map<String, Long> registers, boolean isP0)
 		{
+			this.instructionIndex = 0;
+			this.instructions = instructions;
+			this.registers = registers;
 			this.isP0 = isP0;
 		}
 
 		@Override
 		public void run()
 		{
-			if (isP0)
-			{
-				executeInstructions(registersP0, instructionsP0, instructionIndexP0, true);
-			}
-			else
-			{
-				executeInstructions(registersP1, instructionsP1, instructionIndexP1, false);
-			}
+			executeInstructions(registers, instructions, isP0);
 			stop();
 		}
 
-		private int executeInstructions(Map<String, Long> registers, List<RegisterInstruction> instructions, int instructionIndex, boolean isP0)
+		private int executeInstructions(Map<String, Long> registers, List<RegisterInstruction> instructions, boolean isP0)
 		{
 			boolean keepGoing = true;
 			int instructionsExecuted = 0;
 			while (keepGoing && instructionIndex >= 0 && instructionIndex < instructions.size())
 			{
 				RegisterInstruction instruction = instructions.get(instructionIndex);
-				keepGoing = execute(registers, instruction, instructionIndex, isP0);
+				keepGoing = execute(registers, instruction, isP0);
 				instructionsExecuted++;
-				instructionIndex = isP0 ? instructionIndexP0 : instructionIndexP1;
 			}
 
-			if (isP0)
-			{
-				instructionIndexP0 = instructionIndex;
-			}
-			else
-			{
-				instructionIndexP1 = instructionIndex;
-			}
 			return instructionsExecuted;
 		}
 
-		private boolean execute(Map<String, Long> registers, RegisterInstruction instruction, int instructionIndex, boolean isP0)
+		private boolean execute(Map<String, Long> registers, RegisterInstruction instruction, boolean isP0)
 		{
 			boolean keepGoing = true;
 			boolean moveToNext = true;
@@ -329,16 +290,6 @@ public class Day18 extends AbstractDay<List<String>>
 				instructionIndex++;
 			}
 
-			if (isP0)
-			{
-				instructionIndexP0 = instructionIndex;
-			}
-			else
-			{
-				instructionIndexP1 = instructionIndex;
-			}
-
-			// return instructionIndex;
 			return keepGoing;
 		}
 
