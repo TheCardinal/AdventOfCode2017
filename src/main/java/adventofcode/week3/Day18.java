@@ -25,6 +25,10 @@ public class Day18 extends AbstractDay<List<String>>
 
 	private Queue<Long> queueP0, queueP1;
 
+	private boolean p0Receiving = false, p1Receiving = false;
+
+	private int p1Sends = 0;
+
 	@Override
 	protected void initialize(boolean isExample)
 	{
@@ -60,162 +64,40 @@ public class Day18 extends AbstractDay<List<String>>
 	@Override
 	public void run(List<String> input)
 	{
-		executeInstructions(registersP0, instructionsP0, instructionIndexP0, true);
+		// executeInstructions(registersP0, instructionsP0, instructionIndexP0, true);
 		// 2147483647 = too high
 		// 3423 = correct
-	}
+		Day18Thread t = new Day18Thread(true);
+		t.start();
 
-	private int executeInstructions(Map<String, Long> registers, List<RegisterInstruction> instructions, int instructionIndex, boolean isP0)
-	{
-		boolean keepGoing = true;
-		int instructionsExecuted = 0;
-		while (keepGoing && instructionIndex >= 0 && instructionIndex < instructions.size())
+		while (t.isAlive())
 		{
-			RegisterInstruction instruction = instructions.get(instructionIndex);
-			keepGoing = execute(registers, instruction, instructionIndex, isP0);
-			instructionsExecuted++;
-			instructionIndex = isP0 ? instructionIndexP0 : instructionIndexP1;
+			// Wait till thread stops
 		}
-
-		if (isP0)
-		{
-			instructionIndexP0 = instructionIndex;
-		}
-		else
-		{
-			instructionIndexP1 = instructionIndex;
-		}
-		return instructionsExecuted;
 	}
 
 	@Override
 	public void bonus(List<String> input)
 	{
 		initializeBonus();
-		int movementMade = 1;
-		while (movementMade > 0)
-		{
-			System.out.println("P0");
-			int p0Movement = executeInstructions(registersP0, instructionsP0, instructionIndexP0, true);
-			System.out.println("P0 moved: " + p0Movement);
-			System.out.println("P1");
-			int p1Movement = executeInstructions(registersP1, instructionsP1, instructionIndexP1, false);
-			System.out.println("P1 moved: " + p1Movement);
+		Day18Thread t0 = new Day18Thread(true);
+		t0.start();
 
-			movementMade = p0Movement + p1Movement;
-		}
-	}
+		Day18Thread t1 = new Day18Thread(false);
+		t1.start();
 
-	private boolean execute(Map<String, Long> registers, RegisterInstruction instruction, int instructionIndex, boolean isP0)
-	{
-		boolean keepGoing = true;
-		boolean moveToNext = true;
-		long valueToUse = instruction.valueFromOtherRegister() ? registers.get(instruction.valueRegisterName) : instruction.value;
-		switch (instruction.operationType)
+		while (t0.isAlive() || t1.isAlive())
 		{
-		case ADD:
-			registers.put(instruction.registerName, registers.get(instruction.registerName) + valueToUse);
-			break;
-		case JUMP:
-			if (getJumpCheckValue(registers, instruction.registerName) > 0)
-			{
-				instructionIndex += valueToUse;
-				moveToNext = false;
-			}
-			break;
-		case MODULO:
-			registers.put(instruction.registerName, registers.get(instruction.registerName) % valueToUse);
-			break;
-		case MULTIPLY:
-			registers.put(instruction.registerName, registers.get(instruction.registerName) * valueToUse);
-			break;
-		case RECOVER:
-			if (registers.get(instruction.registerName) > 0)
-			{
-				if (playedSounds.containsKey(instruction.registerName))
-				{
-					System.out
-						.println("The last sound played from " + instruction.registerName + " is: " + playedSounds.get(instruction.registerName));
-					// instructionIndex = -1;
-					keepGoing = false;
-					moveToNext = false;
-				}
-			}
-			break;
-		case SET:
-			registers.put(instruction.registerName, valueToUse);
-			break;
-		case SOUND:
-			playedSounds.put(instruction.registerName, registers.get(instruction.registerName));
-			break;
-		case SEND:
-			if (isP0)
-			{
-				queueP1.add(valueToUse);
-			}
-			else
-			{
-				queueP0.add(valueToUse);
-			}
-			break;
-		case RECEIVE:
-			if (isP0)
-			{
-				if (queueP1.isEmpty())
-				{
-					moveToNext = false;
-				}
-				else
-				{
-					registers.put(instruction.registerName, queueP1.remove());
-				}
-			}
-			else
-			{
-				if (queueP0.isEmpty())
-				{
-					moveToNext = false;
-				}
-				else
-				{
-					registers.put(instruction.registerName, queueP0.remove());
-				}
-			}
-			break;
-		default:
-			break;
+			// System.out.println("P0");
+			// int p0Movement = executeInstructions(registersP0, instructionsP0, instructionIndexP0, true);
+			// System.out.println("P0 moved: " + p0Movement);
+			// System.out.println("P1");
+			// int p1Movement = executeInstructions(registersP1, instructionsP1, instructionIndexP1, false);
+			// System.out.println("P1 moved: " + p1Movement);
+			//
+			// movementMade = p0Movement + p1Movement;
 		}
-
-		if (moveToNext)
-		{
-			instructionIndex++;
-		}
-
-		if (isP0)
-		{
-			instructionIndexP0 = instructionIndex;
-		}
-		else
-		{
-			instructionIndexP1 = instructionIndex;
-		}
-
-		// return instructionIndex;
-		return keepGoing;
-	}
-
-	private long getJumpCheckValue(Map<String, Long> registers, String input)
-	{
-		long value = 0;
-		try
-		{
-			value = Long.parseLong(input);
-		}
-		catch (NumberFormatException e)
-		{
-			value = registers.get(input);
-		}
-		return value;
+		System.out.println("result: " + p1Sends);
 	}
 
 	@Override
@@ -297,5 +179,181 @@ public class Day18 extends AbstractDay<List<String>>
 		});
 	}
 
-	private final String EXAMPLE = "";
+	private class Day18Thread extends Thread
+	{
+		private final boolean isP0;
+
+		public Day18Thread(boolean isP0)
+		{
+			this.isP0 = isP0;
+		}
+
+		@Override
+		public void run()
+		{
+			if (isP0)
+			{
+				executeInstructions(registersP0, instructionsP0, instructionIndexP0, true);
+			}
+			else
+			{
+				executeInstructions(registersP1, instructionsP1, instructionIndexP1, false);
+			}
+			stop();
+		}
+
+		private int executeInstructions(Map<String, Long> registers, List<RegisterInstruction> instructions, int instructionIndex, boolean isP0)
+		{
+			boolean keepGoing = true;
+			int instructionsExecuted = 0;
+			while (keepGoing && instructionIndex >= 0 && instructionIndex < instructions.size())
+			{
+				RegisterInstruction instruction = instructions.get(instructionIndex);
+				keepGoing = execute(registers, instruction, instructionIndex, isP0);
+				instructionsExecuted++;
+				instructionIndex = isP0 ? instructionIndexP0 : instructionIndexP1;
+			}
+
+			if (isP0)
+			{
+				instructionIndexP0 = instructionIndex;
+			}
+			else
+			{
+				instructionIndexP1 = instructionIndex;
+			}
+			return instructionsExecuted;
+		}
+
+		private boolean execute(Map<String, Long> registers, RegisterInstruction instruction, int instructionIndex, boolean isP0)
+		{
+			boolean keepGoing = true;
+			boolean moveToNext = true;
+			long valueToUse = instruction.valueFromOtherRegister() ? registers.get(instruction.valueRegisterName) : instruction.value;
+			switch (instruction.operationType)
+			{
+			case ADD:
+				registers.put(instruction.registerName, registers.get(instruction.registerName) + valueToUse);
+				break;
+			case JUMP:
+				if (getJumpCheckValue(registers, instruction.registerName) > 0)
+				{
+					instructionIndex += valueToUse;
+					moveToNext = false;
+				}
+				break;
+			case MODULO:
+				registers.put(instruction.registerName, registers.get(instruction.registerName) % valueToUse);
+				break;
+			case MULTIPLY:
+				registers.put(instruction.registerName, registers.get(instruction.registerName) * valueToUse);
+				break;
+			case RECOVER:
+				if (registers.get(instruction.registerName) > 0)
+				{
+					if (playedSounds.containsKey(instruction.registerName))
+					{
+						System.out
+							.println("The last sound played from " + instruction.registerName + " is: " + playedSounds.get(instruction.registerName));
+						// instructionIndex = -1;
+						keepGoing = false;
+						moveToNext = false;
+					}
+				}
+				break;
+			case SET:
+				registers.put(instruction.registerName, valueToUse);
+				break;
+			case SOUND:
+				playedSounds.put(instruction.registerName, registers.get(instruction.registerName));
+				break;
+			case SEND:
+				System.out.println((isP0 ? "p0" : "p1") + " send " + valueToUse);
+				if (isP0)
+				{
+					queueP1.add(valueToUse);
+				}
+				else
+				{
+					p1Sends++;
+					queueP0.add(valueToUse);
+				}
+				break;
+			case RECEIVE:
+				if (isP0)
+				{
+					p0Receiving = true;
+					if (queueP1.isEmpty())
+					{
+						System.out.println("P0 receive, but queue empty");
+						moveToNext = false;
+						if (p1Receiving)
+						{
+							System.out.println("P0 receive, but P1 also, so stop");
+							keepGoing = false;
+						}
+					}
+					else
+					{
+						p0Receiving = false;
+						registers.put(instruction.registerName, queueP1.remove());
+
+					}
+				}
+				else
+				{
+					p1Receiving = true;
+					if (queueP0.isEmpty())
+					{
+						System.out.println("P1 receive, but queue empty");
+						moveToNext = false;
+						if (p0Receiving)
+						{
+							System.out.println("P1 receive, but P0 also, so stop");
+							keepGoing = false;
+						}
+					}
+					else
+					{
+						p1Receiving = false;
+						registers.put(instruction.registerName, queueP0.remove());
+					}
+				}
+				break;
+			default:
+				break;
+			}
+
+			if (moveToNext)
+			{
+				instructionIndex++;
+			}
+
+			if (isP0)
+			{
+				instructionIndexP0 = instructionIndex;
+			}
+			else
+			{
+				instructionIndexP1 = instructionIndex;
+			}
+
+			// return instructionIndex;
+			return keepGoing;
+		}
+
+		private long getJumpCheckValue(Map<String, Long> registers, String input)
+		{
+			long value = 0;
+			try
+			{
+				value = Long.parseLong(input);
+			}
+			catch (NumberFormatException e)
+			{
+				value = registers.get(input);
+			}
+			return value;
+		}
+	}
 }
