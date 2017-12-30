@@ -1,5 +1,7 @@
+// 7493 is het antwoord
 package adventofcode.week3;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -15,7 +17,9 @@ public class Day18 extends AbstractDay<List<String>>
 {
 	private Map<String, Long> playedSounds;
 
-	private Queue<Long> queueP0, queueP1;
+	private Day18Thread t0, t1;
+
+	private Queue<Long> queueWhereP0Reads, queueWhereP1Reads;
 
 	private boolean p0Receiving = false, p1Receiving = false;
 
@@ -42,9 +46,9 @@ public class Day18 extends AbstractDay<List<String>>
 			}
 		}
 
-		Day18Thread t = new Day18Thread(instructions, registers, true);
-		t.start();
-		while (t.isAlive())
+		t0 = new Day18Thread(instructions, registers, true);
+		t0.start();
+		while (t0.isAlive())
 		{
 			// Wait till thread stops
 		}
@@ -54,7 +58,7 @@ public class Day18 extends AbstractDay<List<String>>
 	public void bonus(List<String> input)
 	{
 		// parse the input
-		List<RegisterInstruction> instructions = input.stream().map(i -> new RegisterInstruction(i)).collect(Collectors.toList());
+		List<RegisterInstruction> instructions = input.stream().map(i -> new RegisterInstruction(i, true)).collect(Collectors.toList());
 		List<String> registerNames = instructions.stream().map(ri -> ri.registerName).collect(Collectors.toList());
 		Map<String, Long> registers = new HashMap<>();
 		for (String registerName : registerNames)
@@ -65,15 +69,15 @@ public class Day18 extends AbstractDay<List<String>>
 			}
 		}
 
-		queueP0 = new LinkedList<>();
-		queueP1 = new LinkedList<>();
+		queueWhereP0Reads = new LinkedList<>();
+		queueWhereP1Reads = new LinkedList<>();
 
-		Day18Thread t0 = new Day18Thread(instructions, registers, true);
+		t0 = new Day18Thread(instructions, registers, true);
 		registers.put("p", 1L);
-		Day18Thread t1 = new Day18Thread(instructions, registers, false);
+		t1 = new Day18Thread(instructions, registers, false);
 
-		t0.start();
 		t1.start();
+		t0.start();
 
 		while (t0.isAlive() || t1.isAlive())
 		{
@@ -157,24 +161,30 @@ public class Day18 extends AbstractDay<List<String>>
 
 		private final boolean isP0;
 
+		private boolean keepGoing = true;
+
 		public Day18Thread(List<RegisterInstruction> instructions, Map<String, Long> registers, boolean isP0)
 		{
 			this.instructionIndex = 0;
-			this.instructions = instructions;
-			this.registers = registers;
+			this.instructions = new ArrayList<>(instructions);
+			this.registers = new HashMap<>(registers);
 			this.isP0 = isP0;
 		}
 
 		@Override
 		public void run()
 		{
-			executeInstructions(registers, instructions, isP0);
-			stop();
+			while (keepGoing)
+			{
+				executeInstructions(registers, instructions, isP0);
+			}
+			System.out.println("Stopped going");
+			// stop();
 		}
 
 		private int executeInstructions(Map<String, Long> registers, List<RegisterInstruction> instructions, boolean isP0)
 		{
-			boolean keepGoing = true;
+			// boolean keepGoing = true;
 			int instructionsExecuted = 0;
 			while (keepGoing && instructionIndex >= 0 && instructionIndex < instructions.size())
 			{
@@ -191,6 +201,10 @@ public class Day18 extends AbstractDay<List<String>>
 			boolean keepGoing = true;
 			boolean moveToNext = true;
 			long valueToUse = instruction.valueFromOtherRegister() ? registers.get(instruction.valueRegisterName) : instruction.value;
+			// if (instruction.operationType != OperationType.RECEIVE)
+			// {
+			System.out.println((isP0 ? "p0" : "p1") + " " + instruction.operationType);
+			// }
 			switch (instruction.operationType)
 			{
 			case ADD:
@@ -226,27 +240,28 @@ public class Day18 extends AbstractDay<List<String>>
 				registers.put(instruction.registerName, valueToUse);
 				break;
 			case SOUND:
+				System.out.println((isP0 ? "p0" : "p1") + " sound " + valueToUse);
 				playedSounds.put(instruction.registerName, registers.get(instruction.registerName));
 				break;
 			case SEND:
 				System.out.println((isP0 ? "p0" : "p1") + " send " + valueToUse);
 				if (isP0)
 				{
-					queueP1.add(valueToUse);
+					queueWhereP1Reads.add(valueToUse);
 				}
 				else
 				{
 					p1Sends++;
-					queueP0.add(valueToUse);
+					queueWhereP0Reads.add(valueToUse);
 				}
 				break;
 			case RECEIVE:
 				if (isP0)
 				{
 					p0Receiving = true;
-					if (queueP1.isEmpty())
+					if (queueWhereP0Reads.isEmpty())
 					{
-						System.out.println("P0 receive, but queue empty");
+						// System.out.println("P0 receive, but queue empty");
 						moveToNext = false;
 						if (p1Receiving)
 						{
@@ -257,16 +272,15 @@ public class Day18 extends AbstractDay<List<String>>
 					else
 					{
 						p0Receiving = false;
-						registers.put(instruction.registerName, queueP1.remove());
-
+						registers.put(instruction.registerName, queueWhereP0Reads.remove());
 					}
 				}
 				else
 				{
 					p1Receiving = true;
-					if (queueP0.isEmpty())
+					if (queueWhereP1Reads.isEmpty())
 					{
-						System.out.println("P1 receive, but queue empty");
+						// System.out.println("P1 receive, but queue empty");
 						moveToNext = false;
 						if (p0Receiving)
 						{
@@ -277,7 +291,7 @@ public class Day18 extends AbstractDay<List<String>>
 					else
 					{
 						p1Receiving = false;
-						registers.put(instruction.registerName, queueP0.remove());
+						registers.put(instruction.registerName, queueWhereP1Reads.remove());
 					}
 				}
 				break;

@@ -31,6 +31,26 @@ public class RegisterInstruction
 		}
 	}
 
+	public RegisterInstruction(String instructionString, boolean secondPart)
+	{
+		this(instructionString);
+		if (secondPart)
+		{
+			if (operationType == OperationType.SOUND)
+			{
+				operationType = OperationType.SEND;
+				valueRegisterName = registerName;
+				value = 0;
+			}
+			if (operationType == OperationType.RECOVER)
+			{
+				operationType = OperationType.RECEIVE;
+				valueRegisterName = registerName;
+				value = 0;
+			}
+		}
+	}
+
 	public boolean valueFromOtherRegister()
 	{
 		return StringUtils.isNotBlank(valueRegisterName);
