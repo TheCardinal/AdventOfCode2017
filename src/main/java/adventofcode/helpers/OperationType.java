@@ -8,9 +8,11 @@ public enum OperationType
 	MULTIPLY("mul"),
 	MODULO("mod"),
 	RECOVER("rcv"),
-	JUMP("jgz"),
+	JUMP_GREATER_ZERO("jgz"),
 	SEND("snd2"),
-	RECEIVE("rcv2");
+	RECEIVE("rcv2"),
+	SUBSTRACT("sub"),
+	JUMP_NOT_ZERO("jnz");
 
 	private final String abreviation;
 
@@ -45,9 +47,17 @@ public enum OperationType
 		{
 			return RECOVER;
 		}
-		if (JUMP.abreviation.equals(abreviation))
+		if (JUMP_GREATER_ZERO.abreviation.equals(abreviation))
 		{
-			return JUMP;
+			return JUMP_GREATER_ZERO;
+		}
+		if (JUMP_NOT_ZERO.abreviation.equals(abreviation))
+		{
+			return JUMP_NOT_ZERO;
+		}
+		if (SUBSTRACT.abreviation.equals(abreviation))
+		{
+			return SUBSTRACT;
 		}
 		throw new IllegalArgumentException();
 	}

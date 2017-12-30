@@ -210,7 +210,7 @@ public class Day18 extends AbstractDay<List<String>>
 			case ADD:
 				registers.put(instruction.registerName, registers.get(instruction.registerName) + valueToUse);
 				break;
-			case JUMP:
+			case JUMP_GREATER_ZERO:
 				if (getJumpCheckValue(registers, instruction.registerName) > 0)
 				{
 					instructionIndex += valueToUse;
