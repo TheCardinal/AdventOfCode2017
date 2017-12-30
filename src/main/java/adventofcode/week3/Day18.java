@@ -1,4 +1,3 @@
-// 7493 is het antwoord
 package adventofcode.week3;
 
 import java.util.ArrayList;
@@ -84,6 +83,7 @@ public class Day18 extends AbstractDay<List<String>>
 			// wait for threads to stop
 		}
 		System.out.println("result: " + p1Sends);
+		// 7493 is het antwoord
 	}
 
 	@Override
